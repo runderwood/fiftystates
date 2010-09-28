@@ -23,7 +23,7 @@ class MALegislatorScraper(LegislatorScraper):
         with self.urlopen(url) as page:
             root = lxml.html.fromstring(page)
 
-            for member_url in root.xpath('//div[@class="profileContent"]//div[@class="container"]/a/@href'):
+            for member_url in root.xpath('//div[@class="container"]/a/@href'):
                 member_url = "http://www.malegislature.gov"+member_url
                 self.scrape_member(chamber, term, member_url)
 
@@ -39,6 +39,7 @@ class MALegislatorScraper(LegislatorScraper):
             first_name = last_name = middle_name = None
             if len(name_parts) == 2:
                 first_name, last_name = name_parts
+                middle_name = ''
             elif len(name_parts) == 3:
                 first_name, middle_name, last_name = name_parts
             elif len(name_parts) > 3:
@@ -46,11 +47,17 @@ class MALegislatorScraper(LegislatorScraper):
                 middle_name = name_parts[1]
                 last_name = name_parts[2]
 
-            district = root.xpath('//div[@id="District"]//div[@class="widgetContent"]')[0].text.strip()
-            if len(district.split(' - ')) > 1:
-                district = district.split(' - ')[0]
-            elif len(district.split('. ')) > 1:
-                district = district.split('. ')[0]
+            district = root.xpath('//div[@id="District"]//div[@class="widgetContent"]')
+            if len(district):
+                district = district[0].text.strip()
+                if len(district.split(' - ')) > 1:
+                    district = district.split(' - ')[0]
+                elif len(district.split('. ')) > 1:
+                    district = district.split('. ')[0]
+                else:
+                    district = district[0:32]
+            else:
+                district = 'NotFound'
 
             party = root.xpath('//div[@class="bioDescription"]/div')[0].text.strip().split(',')[0]
             if party == 'Democrat':
