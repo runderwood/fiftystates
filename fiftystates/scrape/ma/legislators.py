@@ -28,7 +28,6 @@ class MALegislatorScraper(LegislatorScraper):
                 self.scrape_member(chamber, term, member_url)
 
     def scrape_member(self, chamber, term, member_url):
-        print member_url
         with self.urlopen(member_url) as page:
             root = lxml.html.fromstring(page)
             root.make_links_absolute(member_url)
